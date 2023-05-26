@@ -121,15 +121,29 @@ int main(void)
       i_flash --;
     }
 
-    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_RESET)   /* sw1 */
-      HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0, GPIO_PIN_RESET);
-    else
-      HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0, GPIO_PIN_SET);
+    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_SET)   /* sw1 */
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_0);
 
     if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_SET)  /* sw2 */
       HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_1);
 
+    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_SET)  /* sw3 */
+      {HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_0);
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_1);
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_2);
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_3);
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_4);
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_5);
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_6);
+      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_7);
+      }
+    /*if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_11) == GPIO_PIN_SET)*/
+      
+    
+
     HAL_Delay(500);
+
+ 
 
     if (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_1) == GPIO_PIN_SET)
       printf("Working:%d: %ld\n", i++, HAL_GetTick());
@@ -273,15 +287,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE(); 
 
   /*Configure GPIO pins : PF0 PF1 */
-  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_7;  /* led1/2/7*/
+  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4| GPIO_PIN_5| GPIO_PIN_6| GPIO_PIN_7 | GPIO_PIN_8| GPIO_PIN_9| GPIO_PIN_10| GPIO_PIN_11| GPIO_PIN_12| GPIO_PIN_13;  /* led1/2/3/4/5/6/7 */
   GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_Initure.Pull = GPIO_NOPULL;
   GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_Initure);
-  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
+  /* HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);*/
 
   /*Configure GPIO pins : PC0 PC1 */
-  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1;  /* sw1 & 2*/
+  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2;  /* sw1 & 2 & 3*/
   GPIO_Initure.Mode = GPIO_MODE_INPUT;
   GPIO_Initure.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
@@ -292,8 +306,15 @@ static void MX_GPIO_Init(void)
   GPIO_Initure.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_Initure);
 
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  GPIO_Initure.Pin = GPIO_PIN_11;   /* key2_n */
+  GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_Initure.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5,0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 4,0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

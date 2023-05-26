@@ -21,6 +21,8 @@
 #include "main.h"
 #include "stdio.h"
 #include "stm32f4xx_it.h"
+
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -257,27 +259,101 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void EXTI9_5_IRQHandler(void)
 {
+   // Handle interrupt events for K1 pins
+ 
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+
 }
+void EXTI15_10_IRQHandler(void)
+{
+   // Handle interrupt events for K1 pins
+ 
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
+
+}
+
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-/*    int i;
-*/
+    int i = 0;
+
     switch(GPIO_Pin)
     {
         case GPIO_PIN_8:
           printf("KEY1 PRESSAED! %ld\n", HAL_GetTick());
-          i_flash = 5;
-/*          for (i = 0; i < 5; i++)
+        
+          for (i = 0; i < 3; i++)
           {
-              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_SET); 
-              HAL_Delay(100);                      
-              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
-              HAL_Delay(100);
+              // The traffic lights are all on
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_SET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_SET);
+              HAL_Delay(1000);
+      
+              // The traffic lights are all out
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_RESET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
+              HAL_Delay(1000);
+          
           }
- */         break;
+          break;
+
+        case GPIO_PIN_11:
+          printf("KEY2 PRESSED! %ld\n", HAL_GetTick());
+          //K2 interrupt processing code, traffic lights all on and off 3 times
+          
+          for (i = 0; i < 3; i++)
+          {
+              // The traffic lights are all on
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_SET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_SET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_SET);
+              HAL_Delay(1000);
+              
+              // The traffic lights are all out
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_8, GPIO_PIN_RESET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_RESET);
+              HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_RESET);
+              HAL_Delay(1000);
+              
+          }
+          break;
     }
 }
 
 /* USER CODE END 1 */
+
+
+/*HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
+static int count = 0;
+  if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_9) == GPIO_PIN_RESET) {
+    // K1 is pressed
+    count++;
+    if (count == 3) {
+      // Blink all traffic lights 3 times
+      for (int i = 0; i < 3; i++) {
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14, GPIO_PIN_SET);
+        HAL_Delay(500);
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14, GPIO_PIN_RESET);
+        HAL_Delay(500);
+      }
+      count = 0;
+    }
+    else {
+      // Toggle traffic light
+      if (count % 2 == 1) {
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+      }
+      else {
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
+      }
+      HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+    }
+  }
+  else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8) == GPIO_PIN_RESET) {
+    // K2 is pressed
+    // Do nothing
+    */
