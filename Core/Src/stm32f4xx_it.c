@@ -282,7 +282,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         case GPIO_PIN_8:
           printf("KEY1 PRESSAED! %ld\n", HAL_GetTick());
         
-          for (i = 0; i < 3; i++)
+          for (i = 0; i < 2; i++)
           {
               // The traffic lights are all on
               HAL_GPIO_WritePin(GPIOF, GPIO_PIN_11, GPIO_PIN_SET);
