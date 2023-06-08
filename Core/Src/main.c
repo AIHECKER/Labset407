@@ -45,6 +45,10 @@ TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN PV */
 int i_flash;
+int i_flash2;
+int i = 0;
+int j =0;
+uint32_t start_time, end_time,elapsed_time;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,7 +78,6 @@ int _write(int fd, char* ptr, int len) {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  int i = 0;
 
   /* USER CODE END 1 */
 
@@ -112,51 +115,56 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    while (i_flash > 0)
-    {
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_SET); 
-      HAL_Delay(100);                      
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);
-      HAL_Delay(100);
-      i_flash --;
-    }
-
-    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_SET)   /* sw1 */
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_0);
-
-    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_SET)  /* sw2 */
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_1);
-
-    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_SET)  /* sw3 */
-      {HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_0);
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_1);
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_2);
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_3);
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_4);
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_5);
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_6);
-      HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_7);
-      }
-    /*if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_11) == GPIO_PIN_SET)*/
-      
-    
-
-    HAL_Delay(500);
-
- 
-
-    if (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_1) == GPIO_PIN_SET)
-      printf("Working:%d: %ld\n", i++, HAL_GetTick());
 
     /* USER CODE END WHILE */
+   
+
+   while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_0) == GPIO_PIN_SET) //读到READY
+   {
+    i = i + 1;
+    printf("%d\n",i);
+    printf("10000 Times%lu ms\n",HAL_GetTick());
+    if(i == 10000)
+    {
+      printf("10000 Times%lu ms\n",HAL_GetTick());
+      //printf("%d\n",i);
+      i = 0;
+    }
+    //printf("%d\n",i);
+    start_time = HAL_GetTick();
+    //printf("hello start_time%lu ms\n",start_time);
+    HAL_GPIO_WritePin(GPIOF,GPIO_PIN_1, GPIO_PIN_SET); //ACK置为1
+    
+    if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_0) == GPIO_PIN_SET)
+    {
+      HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0, GPIO_PIN_SET);
+    }
+    if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_1) == GPIO_PIN_SET)
+    {
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);    
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET);
+      
+    }
+   }
+  }
+   while(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_0) == GPIO_PIN_RESET)//没读到READY
+   {
+    //printf("hello end_time%lu ms\n",end_time);
+    end_time = HAL_GetTick();
+    HAL_GPIO_WritePin(GPIOF,GPIO_PIN_1, GPIO_PIN_RESET); //ACK置为0 
+    elapsed_time = end_time - start_time;
+    }
+   
+   
+  }
 
     /* USER CODE BEGIN 3 */
-  }
   /* USER CODE END 3 */
-}
+
 
 /**
-  * @brief System Clock Configuration
+  * @brief System Clock Configuration 
   * @retval None
   */
 void SystemClock_Config(void)
@@ -282,39 +290,78 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE(); 
   __HAL_RCC_GPIOC_CLK_ENABLE(); 
 
-  /*Configure GPIO pins : PF0 PF1 */
-  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4| GPIO_PIN_5| GPIO_PIN_6| GPIO_PIN_7 | GPIO_PIN_8| GPIO_PIN_9| GPIO_PIN_10| GPIO_PIN_11| GPIO_PIN_12| GPIO_PIN_13;  /* led1/2/3/4/5/6/7 */
-  GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_Initure.Pull = GPIO_NOPULL;
-  GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOF, &GPIO_Initure);
-  /* HAL_GPIO_WritePin(GPIOF, GPIO_PIN_7, GPIO_PIN_RESET);*/
+  /*Configure GPIO pins : PF0 */
+  GPIO_Initure.Pin = GPIO_PIN_0;  /* READY */
+  GPIO_Initure.Mode = GPIO_MODE_INPUT; //设置为输入模式
+  GPIO_Initure.Pull = GPIO_NOPULL; //不使用上下拉电阻
+  GPIO_Initure.Speed = GPIO_SPEED_HIGH; //设置GPIO速度为低速
+  HAL_GPIO_Init(GPIOF, &GPIO_Initure); //初始化GPIO
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PC0 PC1 */
-  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2;  /* sw1 & 2 & 3*/
-  GPIO_Initure.Mode = GPIO_MODE_INPUT;
-  GPIO_Initure.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+    /*Configure GPIO pins : PF1 */
+  GPIO_Initure.Pin = GPIO_PIN_1;  /* ACK */
+  GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP; //设置为推挽输出模式
+  GPIO_Initure.Pull = GPIO_NOPULL; //不使用上下拉电阻
+  GPIO_Initure.Speed = GPIO_SPEED_HIGH; //设置GPIO速度为低速
+  HAL_GPIO_Init(GPIOF, &GPIO_Initure); //初始化GPIO
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_RESET);
+
+    /*Configure GPIO pins : PF2 */
+  GPIO_Initure.Pin = GPIO_PIN_2;  /* control */
+  GPIO_Initure.Mode = GPIO_MODE_INPUT; //设置为输入模式
+  GPIO_Initure.Pull = GPIO_NOPULL; //不使用上下拉电阻
+  GPIO_Initure.Speed = GPIO_SPEED_HIGH; //设置GPIO速度为低速
+  HAL_GPIO_Init(GPIOF, &GPIO_Initure); //初始化GPIO
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_2, GPIO_PIN_RESET);
+
+    /*Configure GPIO pins : PA0~PA7 */
+  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7| GPIO_PIN_8| GPIO_PIN_9| GPIO_PIN_10;  /* DATA */
+  GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP; //设置为推挽输出模式
+  GPIO_Initure.Pull = GPIO_NOPULL; //不使用上下拉电阻
+  GPIO_Initure.Speed = GPIO_SPEED_HIGH; //设置GPIO速度为低速
+  HAL_GPIO_Init(GPIOC, &GPIO_Initure); //初始化GPIO
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);  
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET);  
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);  
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);  
+  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
+  GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;  /* DATA */
+  GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP; //设置为推挽输出模式
+  GPIO_Initure.Pull = GPIO_NOPULL; //不使用上下拉电阻
+  GPIO_Initure.Speed = GPIO_SPEED_HIGH; //设置GPIO速度为低速
+  HAL_GPIO_Init(GPIOB, &GPIO_Initure); //初始化GPIO
+  /*Configure GPIO pins : PC0 PC1 PC2 */
+  // GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;  /* sw1 & 2 & 3 */
+  // GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
+  // GPIO_Initure.Pull = GPIO_NOPULL;
+  // GPIO_Initure.Speed = GPIO_SPEED_FREQ_LOW; //设置GPIO速度为低速
+  // HAL_GPIO_Init(GPIOC, &GPIO_Initure);
 
   /*Configure GPIO pin : PC8 */
-  GPIO_Initure.Pin = GPIO_PIN_8;   /* key1_n */
-  GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
-  GPIO_Initure.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+  // GPIO_Initure.Pin = GPIO_PIN_8;   /* key1_n */
+  // GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
+  // GPIO_Initure.Pull = GPIO_NOPULL;
+  // HAL_GPIO_Init(GPIOC, &GPIO_Initure);
 
-  GPIO_Initure.Pin = GPIO_PIN_11;   /* key2_n */
-  GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
-  GPIO_Initure.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+  // HAL_NVIC_SetPriority(EXTI9_5_IRQn, 4, 0);
+  // HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5,0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 4,0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  /*Configure GPIO pin : PC11 */
+  // GPIO_Initure.Pin = GPIO_PIN_11;   /* key2_n */
+  // GPIO_Initure.Mode = GPIO_MODE_IT_RISING;
+  // GPIO_Initure.Pull = GPIO_NOPULL;
+  // HAL_GPIO_Init(GPIOC, &GPIO_Initure);
+
+  // HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  // HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
